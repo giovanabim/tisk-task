@@ -14,8 +14,9 @@ class Tarefa(models.Model):
     concluido = models.BooleanField(default=False)
     prazo = models.DateField(null=True, blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
-    usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True)
-    lista = models.ForeignKey(Lista, on_delete=models.CASCADE, null=True)
+
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE) # mudei pare cascade pois nao irei manter o historio caso o user seja deletado
+    lista = models.ForeignKey(Lista, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.nome} - {self.concluido} - {self.prazo} - {self.tags}"

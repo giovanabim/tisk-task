@@ -12,7 +12,7 @@ class Lista(models.Model):
     nome = models.CharField(max_length=100)
     importancia = models.CharField(max_length=30, choices=NIVEIS_IMPORTANCIA, default='nao_relevante')
     # progresso = ?
-    usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True)
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE) # mudei pare cascade pois nao irei manter o historio caso o user seja deletado
 
     def __str__(self):
         return f"{self.nome} - {self.importancia}" # tbm queria adicionar o progresso aq
