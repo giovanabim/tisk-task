@@ -1,0 +1,16 @@
+{% extends "base.html" %} 
+
+{% block conteudo %}
+<div class="container-cadastro">
+    <p>Faça cadastro para criar listas e manter os seus dados.</p>
+
+    <form method="POST">
+        {% csrf_token %} <!-- segurança -->
+        {{ form.as_p }} <!-- chamando o formulario -->
+
+        <button type="submit" class="btn-continue">
+            Cadastre-se
+        </button>
+    </form>
+
+{% endblock %}

@@ -24,4 +24,4 @@ class Lista(models.Model):
 
     def __str__(self):
         progresso = round(self.calcular_progresso())
-        return f"{self.nome} - {self.importancia} - {progresso}%" # tbm queria adicionar o progresso aq
+        return f"{self.nome} - {self.importancia} - {progresso}%" 
