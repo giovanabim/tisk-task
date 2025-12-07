@@ -9,10 +9,5 @@ class UsuarioForm(forms.ModelForm): # para o cadastro
         fields = ['nome', 'email', 'senha'] # os campos presentes no formulario
 
 class LoginForm(forms.Form): # para o login
-    email = forms.EmailField(
-        max_length=254,
-        widget=forms.EmailInput(attrs={'placeholder': 'Email'})
-    )
-    senha = forms.CharField(
-        widget=forms.PasswordInput(attrs={'placeholder': 'Senha'})
-    )
+    email = forms.EmailField(max_length=254)
+    senha = forms.CharField(max_length=128, widget=forms.PasswordInput)

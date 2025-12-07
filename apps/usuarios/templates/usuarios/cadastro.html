@@ -1,6 +1,11 @@
 {% extends "base.html" %} 
 
+{% block title %}Tisk Task - Cadastro{% endblock %}
+
 {% block conteudo %}
+</header>
+    <h1 class="logo">Tisk Task</h1>
+</header>
 <div class="container-cadastro">
     <p>Faça cadastro para criar listas e manter os seus dados.</p>
 
@@ -12,5 +17,9 @@
             Cadastre-se
         </button>
     </form>
+
+    <a href="{% url 'login' %}">Já tenho conta</a> 
+
+</div>
 
 {% endblock %}

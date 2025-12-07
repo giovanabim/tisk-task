@@ -1,0 +1,43 @@
+{% extends "base.html" %} 
+
+{% block title %}Tisk Task - Home{% endblock %}
+
+{% block conteudo %}
+</header>
+    <h1 class="logo">Tisk Task</h1>
+    <a href="#"><button>Config</button></a>
+</header>
+<div class="filtros">
+    <h2>Esconder listas:</h2>
+    <label><input type="checkbox"> Prioridade Baixa</label>
+    <label><input type="checkbox"> Prioridade Média</label>
+    <label><input type="checkbox"> Prioridade Alta</label>
+    <a href="#">Gerenciar tags</a> <!--% url 'gerenciar_tags' %-->
+</div>
+<div class="listas-container">
+    {% for lista in listas %}
+    <a href="#"> <!--% url 'detalhe_lista' lista.pk %-->
+        <div class="lista-card {{ lista.importancia }}">
+            <h2>{{ lista.nome }}</h2>
+            <div class="barra-progresso" style="width: {{ lista.calcular_progresso }}%;"></div>
+        
+            {% for tarefa in lista.tarefa_set.all|slice:":3" %}
+                {% if not tarefa.concluido %}
+                <p id="tarefa_{{ tarefa.id }}">{{ tarefa.nome }}</p>
+                {% endif %}
+            {% empty %}
+                <p>Nenhuma tarefa nesta lista</p>
+            {% endfor %}
+
+            {% if lista.tarefa_set.count > 3 %}
+                <p>...</p>
+            {% endif %}
+        </div>
+    </a>
+    {% empty %}
+    {% endfor %}
+
+    <a href="#" class="card-adicionar">+</a> <!--% url 'adicionar_lista' %-->
+</div>
+
+{% endblock %}
