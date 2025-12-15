@@ -44,7 +44,15 @@ def logar_usuario(request):
 def home(request):
     usuario_logado = request.user # contem o objeto Usuario logado
     listas = Lista.objects.filter(usuario=usuario_logado).prefetch_related('tarefa_set') # busca todas as listas do usuario logado e as tarefas contidas nelas
+    
+    prioridades_a_esconder = request.GET.getlist('esconder_prioridade')
+    if prioridades_a_esconder:
+        listas = listas.exclude(prioridade__in=prioridades_a_esconder)
+
+    listas = listas.order_by('-prioridade')
+    
     contexto = { # para o template
         'listas': listas,
+        'prioridades_escondidas': prioridades_a_esconder,
     }
     return render(request, 'usuarios/home.html', contexto)

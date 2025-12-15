@@ -1,0 +1,45 @@
+{% extends "base.html" %} 
+
+{% block title %}Tisk Task - {{ lista.nome }}{% endblock %}
+
+{% block conteudo %}
+
+<header>
+    <h1 class="logo">Tisk Task</h1>
+    <div class="nome-lista-container">
+        <form method="POST"> <!-- muda o nome da lista -->
+            {% csrf_token %}
+            <input 
+                type="text" 
+                name="nome_lista"
+                value="{{ lista.nome }}" 
+                onchange="this.form.submit()"
+                class="nome-lista">
+            <!-- imagem aq pra representar edição -->
+        </form>
+    </div>
+    <a href="#"><button>Config</button></a>
+</header>
+
+<div class="aside">
+    <h2>Prioridade da lista:</h2>
+    <form method="POST"> <!-- muda a prioridade da lista -->
+        {% csrf_token %}
+        <button type="submit" name="prioridade_lista" value="alta" 
+                class="{% if lista.prioridade == 'alta' %}selected-{{lista.prioridade}}{% endif %}">Alta</button>
+                
+        <button type="submit" name="prioridade_lista" value="media" 
+                class="{% if lista.prioridade == 'media' %}selected-{{lista.prioridade}}{% endif %}">Média</button>
+                
+        <button type="submit" name="prioridade_lista" value="baixa" 
+                class="{% if lista.prioridade == 'baixa' %}selected-{{lista.prioridade}}{% endif %}">Baixa</button>
+    </form>
+
+    <a href="#">Apagar todas as tarefas concluidas</a> <!-- criar a view -->
+    <a href="{% url 'apagar_lista' lista_id=lista.pk %}">Apagar lista</a>
+    <a href="{% url 'home' %}">Voltar para o início</a>
+</div>
+
+<!-- Tabela com as tarefas -->
+
+{% endblock %}

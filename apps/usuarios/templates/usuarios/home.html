@@ -3,21 +3,55 @@
 {% block title %}Tisk Task - Home{% endblock %}
 
 {% block conteudo %}
-</header>
+
+<header>
     <h1 class="logo">Tisk Task</h1>
     <a href="#"><button>Config</button></a>
 </header>
-<div class="filtros">
-    <h2>Esconder listas:</h2>
-    <label><input type="checkbox"> Prioridade Baixa</label>
-    <label><input type="checkbox"> Prioridade Média</label>
-    <label><input type="checkbox"> Prioridade Alta</label>
+
+<div class="aside">
+    <div class="filtros-prioridade">
+        <h2>Esconder listas:</h2>
+        <form method="GET" action="{% url 'home' %}">
+            <label>
+                <input type="checkbox" 
+                    name="esconder_prioridade" 
+                    value="baixa"
+                    onchange="this.form.submit()"
+                    {% if 'baixa' in prioridades_escondidas %}checked{% endif %}
+                > 
+                Prioridade Baixa
+            </label>
+        
+            <label>
+                <input type="checkbox" 
+                    name="esconder_prioridade" 
+                    value="media"
+                    onchange="this.form.submit()"
+                    {% if 'media' in prioridades_escondidas %}checked{% endif %}
+                > 
+                Prioridade Média
+            </label>
+            
+            <label>
+                <input type="checkbox" 
+                    name="esconder_prioridade" 
+                    value="alta"
+                    onchange="this.form.submit()"
+                    {% if 'alta' in prioridades_escondidas %}checked{% endif %}
+                > 
+                Prioridade Alta
+            </label>
+
+        </form>
+    </div>
     <a href="#">Gerenciar tags</a> <!--% url 'gerenciar_tags' %-->
 </div>
+
 <div class="listas-container">
     {% for lista in listas %}
-    <a href="#"> <!--% url 'detalhe_lista' lista.pk %-->
-        <div class="lista-card {{ lista.importancia }}">
+    <a href="{% url 'detalhe_lista' lista.pk %}">
+        <div class="lista-card {{ lista.prioridade }}">
             <h2>{{ lista.nome }}</h2>
             <div class="barra-progresso" style="width: {{ lista.calcular_progresso }}%;"></div>
         
@@ -37,7 +71,7 @@
     {% empty %}
     {% endfor %}
 
-    <a href="#" class="card-adicionar">+</a> <!--% url 'adicionar_lista' %-->
+    <a href="{% url 'adicionar_lista' %}" class="card-adicionar">+</a>
 </div>
 
 {% endblock %}

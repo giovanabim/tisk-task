@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -5,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>{% block title %}Tisk Task{% endblock %}</title>
-    
+    <link rel="stylesheet" href="{% static 'global/styles.css' %}">
 </head>
 <body>
     <main>
