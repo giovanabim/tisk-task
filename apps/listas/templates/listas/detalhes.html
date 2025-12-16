@@ -84,6 +84,13 @@
                     </form>
                 </td>
                 <td> 
+                    <div id="tags-visual-{{ tarefa.pk }}">
+                        {% for tag in tarefa.tags.all %} 
+                            <span class="tag-balao" data-tag-id="{{ tag.pk }}">{{ tag.nome }}</span>
+                        {% endfor %}
+                    </div>
+                    
+                    <button onclick="toggleDropdown(event, {{ tarefa.pk }})">➕</button>
                 </td>
                  <td>
                     <a href="{% url 'apagar_tarefa' lista_id=lista.pk tarefa_id=tarefa.pk %}">🗑️</a>
@@ -117,7 +124,36 @@
     </tbody>
 </table>
 
+<div class="drop-down-tags" id="seletor-tags-modal" style="display: none; position: absolute; border: 1px black solid; background-color: white;">
+    
+    <form method="POST" id="form-vincular-tags">
+        {% csrf_token %}
+        <input type="hidden" name="tarefa_id" id="input-tarefa-id">
+        
+        <p>Selecione as Tags:</p>
+        
+        <div class="tag-listagem-container">
+            {% for tag in tags %} 
+                <label class="tag-checkbox-item">
+                    <input type="checkbox" 
+                           name="marcar_tag"       id="tag-checkbox-{{ tag.pk }}"
+                           value="{{ tag.pk }}"    onchange="submitFormDelayed()"> {{ tag.nome }}
+                </label>
+            {% empty %}
+                <p>Nenhuma tag disponível. <a href="{% url 'gerenciar_tags' %}">Crie uma agora</a>.</p>
+            {% endfor %}
+        </div>
+        
+        <button type="submit" style="display: none;">Salvar</button>
+    </form>
+    
+    <button onclick="fecharDropdown()">Fechar</button>
+</div>
+
 <script>
+    const LISTA_ID = {{ lista.pk }};
+    let submitTimeout = null;
+
     document.addEventListener('DOMContentLoaded', function() {
         const novaTarefaInput = document.getElementById('nova-tarefa-input');
 
@@ -130,6 +166,56 @@
             });
         }
     });
+
+    function fecharDropdown() { // abrir/fechar dropdown
+        document.getElementById('seletor-tags-modal').style.display = 'none';
+    }
+
+    function submitFormDelayed() { // submeter para a url
+        if (submitTimeout) {
+            clearTimeout(submitTimeout);
+        }
+        
+        submitTimeout = setTimeout(() => {
+            const tarefaId = document.getElementById('input-tarefa-id').value;
+            const form = document.getElementById('form-vincular-tags');
+            
+            if (!tarefaId || isNaN(parseInt(tarefaId))) {
+
+            form.action = `/listas/${LISTA_ID}/${tarefaId}/vincular_tag/`;
+            
+            form.submit(); 
+        }, 300); 
+    }
+
+    function toggleDropdown(event, tarefaId) { // marcar as tags e posicionar o dropdown
+        const modal = document.getElementById('seletor-tags-modal');
+        const inputTarefaId = document.getElementById('input-tarefa-id');
+
+        inputTarefaId.value = tarefaId;
+
+        const allCheckboxes = modal.querySelectorAll('input[name="marcar_tag"]');
+        allCheckboxes.forEach(cb => cb.checked = false);
+
+        const tagsContainer = document.getElementById(`tags-visual-${tarefaId}`);
+        if (tagsContainer) {
+            const tagsAtuais = tagsContainer.querySelectorAll('.tag-balao');
+            
+            tagsAtuais.forEach(tagBalao => {
+                const tagId = tagBalao.dataset.tagId; 
+                const checkbox = document.getElementById(`tag-checkbox-${tagId}`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+        
+        const rect = event.target.getBoundingClientRect();
+        modal.style.top = `${rect.bottom + window.scrollY + 5}px`;
+        modal.style.left = `${rect.left + window.scrollX}px`;
+        modal.style.display = 'block';
+    }
+
 </script>
 
 {% endblock %}

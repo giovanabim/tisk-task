@@ -113,3 +113,32 @@ def gerenciar_tags(request):
         'tags': tags
     }
     return render(request, 'tarefas/gerenciar_tags.html', contexto)
+
+@login_required(login_url='login')
+def vincular_tag_tarefa(request, lista_id, tarefa_id):
+    try:
+        tarefa = Tarefa.objects.get(
+            pk=tarefa_id,
+            lista__pk=lista_id, 
+            lista__usuario=request.user
+        )
+    except Tarefa.DoesNotExist:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'sucesso': False, 'mensagem': 'Tarefa não encontrada.'}, status=404)
+        return redirect('detalhe_lista', lista_id=lista_id) 
+
+    if request.method == 'POST':
+        #  lista de IDs de tags que foram marcadas
+        tags_marcadas_ids = request.POST.getlist('marcar_tag')
+        
+        # tags que o usuário realmente possui e que foram marcados
+        tags_do_usuario = Tag.objects.filter(
+            usuario=request.user, 
+            pk__in=tags_marcadas_ids
+        )
+        
+        tarefa.tags.set(tags_do_usuario)
+        
+        return redirect('detalhe_lista', lista_id=lista_id)
+
+    return redirect('detalhe_lista', lista_id=lista_id)

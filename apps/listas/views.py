@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Lista
+from apps.tarefas.models import Tag
 
 @login_required(login_url='login')
 def adicionar_lista(request):
@@ -31,9 +32,12 @@ def detalhe_lista(request, lista_id):
 
     tarefas = lista.tarefa_set.all().order_by('concluido', 'id')
 
+    tags_disponiveis = Tag.objects.filter(usuario=request.user).order_by('nome')
+
     contexto = {
         'lista': lista,
         'tarefas': tarefas,
+        'tags': tags_disponiveis,
     }
 
     return render(request, 'listas/detalhes.html', contexto)

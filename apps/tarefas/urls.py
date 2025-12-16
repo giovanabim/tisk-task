@@ -6,6 +6,7 @@ urlpatterns = [
     path('<int:tarefa_id>/toggle/', views.toggle_tarefa, name='toggle_tarefa'),
     path('<int:tarefa_id>/apagar/', views.apagar_tarefa, name='apagar_tarefa'),
     path('apagar_concluidas/', views.apagar_tarefas_concluidas, name='apagar_tarefas_concluidas'),
+    path('<int:tarefa_id>/vincular_tag/', views.vincular_tag_tarefa, name='vincular_tag_tarefa'),
     # nome e prazo
     path('<int:tarefa_id>/editar/', views.editar_tarefa, name='editar_tarefa'), 
 ]
