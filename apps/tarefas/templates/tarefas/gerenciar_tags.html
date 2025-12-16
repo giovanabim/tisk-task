@@ -1,0 +1,38 @@
+{% extends "base.html" %} 
+
+{% block title %}Tisk Task - Gerenciar Tags{% endblock %}
+
+{% block conteudo %}
+
+<h1>Gerenciar Tags</h1>
+
+<h2>Criar Nova Tag</h2>
+<form method="POST">
+    {% csrf_token %}
+    <input type="text" name="nome_tag" placeholder="Nome da nova tag" required>
+    <input type="hidden" name="criar_tag" value="true"> 
+    <button type="submit">Criar Tag</button>
+</form>
+
+<hr>
+
+<h2>Tags Existentes</h2>
+<ul class="lista-tags">
+    {% for tag in tags %}
+    <li class="tag-item">
+        {{ tag.nome }} 
+        <form method="POST" style="display: inline;">
+            {% csrf_token %}
+            <input type="hidden" name="apagar_tag_id" value="{{ tag.pk }}">
+            <button type="submit" class="botao-apagar-tag">🗑️</button>
+        </form>
+    </li>
+    {% empty %}
+    <li>Nenhuma tag cadastrada ainda.</li>
+    {% endfor %}
+</ul>
+
+<hr>
+<a href="{% url 'home' %}">Voltar para o início</a>
+
+{% endblock %}

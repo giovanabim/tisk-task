@@ -29,8 +29,11 @@ def detalhe_lista(request, lista_id):
         
         return redirect('detalhe_lista', lista_id = lista.pk)
 
+    tarefas = lista.tarefa_set.all().order_by('concluido', 'id')
+
     contexto = {
         'lista': lista,
+        'tarefas': tarefas,
     }
 
     return render(request, 'listas/detalhes.html', contexto)

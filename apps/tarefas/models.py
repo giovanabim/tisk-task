@@ -5,6 +5,11 @@ from apps.listas.models import Lista # para a chave estrangeira de listas
 
 class Tag(models.Model):
     nome = models.CharField(max_length=50, unique=True)
+
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('usuario', 'nome')
     
     def __str__(self):
         return self.nome

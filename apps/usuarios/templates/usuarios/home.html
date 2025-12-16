@@ -45,15 +45,15 @@
 
         </form>
     </div>
-    <a href="#">Gerenciar tags</a> <!--% url 'gerenciar_tags' %-->
+    <a href="{% url 'gerenciar_tags' %}">Gerenciar tags</a>
 </div>
 
 <div class="listas-container">
     {% for lista in listas %}
-    <a href="{% url 'detalhe_lista' lista.pk %}">
+    <a href="{% url 'detalhe_lista' lista_id=lista.pk %}">
         <div class="lista-card {{ lista.prioridade }}">
             <h2>{{ lista.nome }}</h2>
-            <div class="barra-progresso" style="width: {{ lista.calcular_progresso }}%;"></div>
+            <div class="barra-progresso" style="width: {{ lista.calcular_progresso }}%; height: 10px; background-color: lightblue"></div>
         
             {% for tarefa in lista.tarefa_set.all|slice:":3" %}
                 {% if not tarefa.concluido %}

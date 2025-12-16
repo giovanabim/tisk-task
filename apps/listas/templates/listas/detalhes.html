@@ -21,6 +21,15 @@
     <a href="#"><button>Config</button></a>
 </header>
 
+<div class="progresso-container">
+    <div class="barra-progresso-base">
+        <div class="barra-progresso-fill" 
+             style="width: {{ lista.calcular_progresso }}%; background-color: lightblue">
+            {{ lista.calcular_progresso|floatformat:0 }}%
+        </div>
+    </div>
+</div>
+
 <div class="aside">
     <h2>Prioridade da lista:</h2>
     <form method="POST"> <!-- muda a prioridade da lista -->
@@ -35,11 +44,92 @@
                 class="{% if lista.prioridade == 'baixa' %}selected-{{lista.prioridade}}{% endif %}">Baixa</button>
     </form>
 
-    <a href="#">Apagar todas as tarefas concluidas</a> <!-- criar a view -->
+    <a href="{% url 'apagar_tarefas_concluidas' lista_id=lista.pk %}">Apagar todas as tarefas concluidas</a>
     <a href="{% url 'apagar_lista' lista_id=lista.pk %}">Apagar lista</a>
     <a href="{% url 'home' %}">Voltar para o início</a>
 </div>
 
 <!-- Tabela com as tarefas -->
+<table class="tabela-tarefas">
+    <tbody>
+        {% for tarefa in tarefas %}
+            <tr class="{% if tarefa.concluido %}concluida{% endif %}">
+                <td> 
+                    <form method="POST" action="{% url 'toggle_tarefa' lista_id=lista.pk tarefa_id=tarefa.pk %}">
+                        {% csrf_token %}
+                        <input type="checkbox" 
+                               name="concluido" 
+                               onchange="this.form.submit()" 
+                               {% if tarefa.concluido %}checked{% endif %}>
+                    </form>
+                </td>
+                <td> 
+                    <form method="POST" action="{% url 'editar_tarefa' lista_id=lista.pk tarefa_id=tarefa.pk %}"> 
+                        {% csrf_token %}
+                        <input 
+                            type="text" 
+                            name="nome_tarefa"
+                            value="{{ tarefa.nome }}" 
+                            onchange="this.form.submit()">
+                    </form>
+                </td>
+                <td> 
+                    <form method="POST" action="{% url 'editar_tarefa' lista_id=lista.pk tarefa_id=tarefa.pk %}"> 
+                        {% csrf_token %}
+                        <input 
+                            type="date" 
+                            name="prazo_tarefa"
+                            value="{{ tarefa.prazo|date:'Y-m-d' }}" 
+                            onchange="this.form.submit()">
+                    </form>
+                </td>
+                <td> 
+                </td>
+                 <td>
+                    <a href="{% url 'apagar_tarefa' lista_id=lista.pk tarefa_id=tarefa.pk %}">🗑️</a>
+                </td>
+            </tr>
+        {% endfor %}
+        
+        <tr class="adicionar-tarefa">
+            <form method="POST" action="{% url 'adicionar_tarefa' lista_id=lista.pk %}">
+                {% csrf_token %}
+                
+                <td></td>
+                <td>
+                    <input type="text" 
+                           name="titulo_tarefa" 
+                           placeholder="Adicionar nova tarefa..." 
+                           id="nova-tarefa-input"
+                           required>
+                </td>
+                <td>
+                    <input type="date" 
+                           name="prazo">
+                </td>
+                <td>
+                    <button type="submit" style="display: none;" id="adicionar-btn">Adicionar</button>
+                    <label for="adicionar-btn" class="adicionar-icone" onclick="document.getElementById('nova-tarefa-input').focus()">+</label>
+                </td>
+                <td></td>
+            </form>
+        </tr>
+    </tbody>
+</table>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const novaTarefaInput = document.getElementById('nova-tarefa-input');
+
+        if (novaTarefaInput) {
+            novaTarefaInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); 
+                    this.form.submit();
+                }
+            });
+        }
+    });
+</script>
 
 {% endblock %}
