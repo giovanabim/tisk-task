@@ -180,7 +180,6 @@
             const tarefaId = document.getElementById('input-tarefa-id').value;
             const form = document.getElementById('form-vincular-tags');
             
-            if (!tarefaId || isNaN(parseInt(tarefaId))) {
 
             form.action = `/listas/${LISTA_ID}/${tarefaId}/vincular_tag/`;
             
