@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from .forms import UsuarioForm, LoginForm # o formulario do user de cadastro e login
 from .models import Usuario # o model do user
 
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 
 from django.contrib.auth.decorators import login_required
 from apps.listas.models import Lista
@@ -56,3 +56,13 @@ def home(request):
         'prioridades_escondidas': prioridades_a_esconder,
     }
     return render(request, 'usuarios/home.html', contexto)
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+@login_required
+def apagar_conta(request):
+    usuario = request.user
+    usuario.delete() 
+    return redirect('login')

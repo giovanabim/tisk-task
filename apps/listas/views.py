@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Lista
-from apps.tarefas.models import Tag
+from apps.tarefas.models import Tag, Tarefa
+from django.db.models import F
 
 @login_required(login_url='login')
 def adicionar_lista(request):
@@ -29,8 +30,13 @@ def detalhe_lista(request, lista_id):
                 lista.save()
         
         return redirect('detalhe_lista', lista_id = lista.pk)
+    tarefas = lista.tarefa_set.all().order_by('concluido', 
+                                              F('prazo').asc(nulls_last=True),
+                                              'id')
 
-    tarefas = lista.tarefa_set.all().order_by('concluido', 'id')
+    tags_filtradas_ids = request.GET.getlist('filtro_tag')
+    if tags_filtradas_ids:
+        tarefas = tarefas.filter(tags__in = tags_filtradas_ids).distinct()
 
     tags_disponiveis = Tag.objects.filter(usuario=request.user).order_by('nome')
 
@@ -38,6 +44,7 @@ def detalhe_lista(request, lista_id):
         'lista': lista,
         'tarefas': tarefas,
         'tags': tags_disponiveis,
+        'tags_filtradas_ids': tags_filtradas_ids,
     }
 
     return render(request, 'listas/detalhes.html', contexto)

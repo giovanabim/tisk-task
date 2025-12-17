@@ -18,7 +18,7 @@
             <!-- imagem aq pra representar edição -->
         </form>
     </div>
-    <a href="#"><button>Config</button></a>
+    <button onclick="toggleSidebar()">☰</button>
 </header>
 
 <div class="progresso-container">
@@ -42,6 +42,29 @@
                 
         <button type="submit" name="prioridade_lista" value="baixa" 
                 class="{% if lista.prioridade == 'baixa' %}selected-{{lista.prioridade}}{% endif %}">Baixa</button>
+    </form>
+
+    <h2>Filtrar por Tags:</h2>
+    <form method="GET" action="{% url 'detalhe_lista' lista_id=lista.pk %}">
+        
+        {% for tag in tags %}
+            <label class="tag-filtro-item">
+                <input type="checkbox" 
+                    name="filtro_tag" 
+                    value="{{ tag.pk }}"
+                    onchange="this.form.submit()"
+                    
+                    {% if tag.pk|stringformat:"s" in tags_filtradas_ids %}checked{% endif %}
+                > 
+                {{ tag.nome }}
+            </label>
+        {% empty %}
+            <p>Nenhuma tag para filtrar.</p>
+        {% endfor %}
+        
+        {% if tags_filtradas_ids %}
+            <a href="{% url 'detalhe_lista' lista_id=lista.pk %}" class="limpar-filtro">Limpar Filtros</a>
+        {% endif %}
     </form>
 
     <a href="{% url 'apagar_tarefas_concluidas' lista_id=lista.pk %}">Apagar todas as tarefas concluidas</a>

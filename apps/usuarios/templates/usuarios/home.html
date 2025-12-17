@@ -6,8 +6,24 @@
 
 <header>
     <h1 class="logo">Tisk Task</h1>
-    <a href="#"><button>Config</button></a>
+    <button onclick="toggleSidebar()">☰</button>
 </header>
+
+<div id="sidebar" style="display: none; border-left: 1px solid black; height: 100vh; width: 250px; background-color: white; position: fixed; right: 0; top: 0; z-index: 9999; padding: 20px;">
+    <div class="user">
+        <!-- Icone de user -->
+        <h2>{{ request.user.username }}</h2>
+    </div>
+    <div class="apagar-user">
+        <p onclick="mostrarContinue()">Apagar conta</p>
+        <div id="continue" style="display: none;">
+            <p>Tem certeza que deseja apagar sua conta?</p>
+            <button onclick="esconderContinue()">Não</button>
+            <a href="{% url 'apagar_conta' %}" style="color: red;">Sim</a>
+        </div>
+    </div>
+    <a href="{% url 'logout' %}">Sair da conta</a>
+</div>
 
 <div class="aside">
     <div class="filtros-prioridade">
@@ -42,7 +58,6 @@
                 > 
                 Prioridade Alta
             </label>
-
         </form>
     </div>
     <a href="{% url 'gerenciar_tags' %}">Gerenciar tags</a>
@@ -73,5 +88,35 @@
 
     <a href="{% url 'adicionar_lista' %}" class="card-adicionar">+</a>
 </div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        // se estiver escondido, mostra como blcok, se não, esconde.
+        if (sidebar.style.display === 'none' || sidebar.style.display === '') {
+            sidebar.style.display = 'block';
+        } else {
+            sidebar.style.display = 'none';
+            esconderContinue(); // fecha a confirmação de apagar conta ao fechar o menu
+        }
+        // se clicar fora, esconde
+        document.addEventListener('click', (e) => {
+            if (sidebar.style.display === 'block') {
+                if (!sidebar.contains(e.target) && !btnToggle.contains(e.target)) {
+                    sidebar.style.display = 'none';
+                    esconderContinue();
+                }
+            }
+        });
+    }
+
+    function mostrarContinue() {
+        document.getElementById('continue').style.display = 'block';
+    }
+
+    function esconderContinue() {
+        document.getElementById('continue').style.display = 'none';
+    }
+</script>
 
 {% endblock %}
