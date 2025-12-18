@@ -44,35 +44,46 @@
     </nav>
 </div>
 
-<h1>Gerenciar Tags</h1>
+<div class="container-tags">
+    <h1>Gerenciar Tags</h1>
 
-<h2>Criar Nova Tag</h2>
-<form method="POST">
-    {% csrf_token %}
-    <input type="text" name="nome_tag" placeholder="Nome da nova tag" required>
-    <input type="hidden" name="criar_tag" value="true"> 
-    <button type="submit">Criar Tag</button>
-</form>
-
-<hr>
-
-<h2>Tags Existentes</h2>
-<ul class="lista-tags">
-    {% for tag in tags %}
-    <li class="tag-item">
-        {{ tag.nome }} 
-        <form method="POST" style="display: inline;">
+    <section class="secao-criar">
+        <h2>Criar Nova Tag</h2>
+        <form method="POST" class="form-criar-tag">
             {% csrf_token %}
-            <input type="hidden" name="apagar_tag_id" value="{{ tag.pk }}">
-            <button type="submit" class="botao-apagar-tag">🗑️</button>
+            <input type="text" name="nome_tag" placeholder="Nome da nova tag" required class="input-minimalista">
+            <input type="hidden" name="criar_tag" value="true"> 
+            <button type="submit" class="btn-principal">Criar Tag</button>
         </form>
-    </li>
-    {% empty %}
-    <li>Nenhuma tag cadastrada ainda.</li>
-    {% endfor %}
-</ul>
+    </section>
 
-<hr>
-<a href="{% url 'home' %}">Voltar para o início</a>
+    <hr class="divisor">
+
+    <section class="secao-lista">
+        <h2>Tags Existentes</h2>
+        <div class="grid-tags">
+            {% for tag in tags %}
+            <div class="tag-card">
+                <span class="tag-nome">{{ tag.nome }}</span>
+                <form method="POST" class="form-apagar">
+                    {% csrf_token %}
+                    <input type="hidden" name="apagar_tag_id" value="{{ tag.pk }}">
+                    <button type="submit" class="btn-apagar-icone" title="Apagar Tag">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18"></path>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+            {% empty %}
+            <p class="aviso-vazio">Nenhuma tag cadastrada ainda.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <a href="{% url 'home' %}" class="link-voltar">← Voltar para o início</a>
+</div>
 
 {% endblock %}
