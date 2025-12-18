@@ -3,29 +3,27 @@
 {% block title %}Tisk Task - Login{% endblock %}
 
 {% block conteudo %}
-</header>
-    <h1 class="logo">Tisk Task</h1>
-</header>
+<div style="text-align: center; width: 100%;">
+    <h1 class="logo">Tisk-Task</h1>
+</div>
+
 <div class="container-login">
     <p>Bem vindo de volta!</p>
 
     <form method="POST">
-        {% csrf_token %} <!-- segurança -->
-        {{ form.as_p }} <!-- chamando o formulario -->
+        {% csrf_token %}
+        
+        {{ form.as_p }}
 
         {% if form.errors %}
-            <ul class="errorlist">
-                {% for error in form.non_field_errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
+            
         {% endif %}
 
         <button type="submit" class="btn-continue">
             Entrar
         </button>
     </form>
+
     <a href="{% url 'cadastro' %}">Não tenho conta</a>
 </div>
-
 {% endblock %}

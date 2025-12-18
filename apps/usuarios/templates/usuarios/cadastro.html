@@ -3,15 +3,16 @@
 {% block title %}Tisk Task - Cadastro{% endblock %}
 
 {% block conteudo %}
-</header>
-    <h1 class="logo">Tisk Task</h1>
-</header>
+<div style="text-align: center; width: 100%;">
+    <h1 class="logo">Tisk-Task</h1>
+</div>
+
 <div class="container-cadastro">
     <p>Faça cadastro para criar listas e manter os seus dados.</p>
 
     <form method="POST">
-        {% csrf_token %} <!-- segurança -->
-        {{ form.as_p }} <!-- chamando o formulario -->
+        {% csrf_token %}
+        {{ form.as_p }}
 
         <button type="submit" class="btn-continue">
             Cadastre-se
@@ -19,7 +20,6 @@
     </form>
 
     <a href="{% url 'login' %}">Já tenho conta</a> 
-
 </div>
 
 {% endblock %}

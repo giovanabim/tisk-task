@@ -54,6 +54,7 @@ def home(request):
     contexto = { # para o template
         'listas': listas,
         'prioridades_escondidas': prioridades_a_esconder,
+        'usuario': usuario_logado,
     }
     return render(request, 'usuarios/home.html', contexto)
 

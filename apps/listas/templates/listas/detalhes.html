@@ -6,172 +6,223 @@
 
 <header>
     <h1 class="logo">Tisk Task</h1>
-    <div class="nome-lista-container">
-        <form method="POST"> <!-- muda o nome da lista -->
-            {% csrf_token %}
-            <input 
-                type="text" 
-                name="nome_lista"
-                value="{{ lista.nome }}" 
-                onchange="this.form.submit()"
-                class="nome-lista">
-            <!-- imagem aq pra representar edição -->
-        </form>
-    </div>
-    <button onclick="toggleSidebar()">☰</button>
+    <button onclick="toggleSidebar()" class="btn-menu">
+        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" cursor="pointer">
+            <path d="M4 6H20" stroke="black" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M4 12H20" stroke="black" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M4 18H20" stroke="black" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+    </button>
 </header>
 
-<div class="progresso-container">
-    <div class="barra-progresso-base">
-        <div class="barra-progresso-fill" 
-             style="width: {{ lista.calcular_progresso }}%; background-color: lightblue">
-            {{ lista.calcular_progresso|floatformat:0 }}%
+<div id="sidebar" class="sidebar">
+    <div class="user-section">
+        <div class="user-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+        </div>
+        <h2>{{ request.user.nome }}</h2>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-item apagar-user">
+            <p onclick="mostrarContinue()">Apagar conta</p>
+            <div id="continue" class="confirmacao-box" style="display: none;">
+                <p>Tem certeza?</p>
+                <div class="confirm-buttons">
+                    <button onclick="esconderContinue()" class="btn-negativo">Não</button>
+                    <a href="{% url 'apagar_conta' %}" class="btn-positivo">Sim</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-item">
+            <a href="{% url 'logout' %}">Sair da conta</a>
+        </div>
+    </nav>
+</div>
+
+<div class="conteudo-detalhes"> <!-- incluindo lista e menu aside -->
+    <div class="aside detalhes">
+        <h2>Prioridade da lista:</h2>
+        <form method="POST"> <!-- muda a prioridade da lista -->
+            {% csrf_token %}
+            <button type="submit" name="prioridade_lista" value="alta" 
+                    class="{% if lista.prioridade == 'alta' %}selected-{{lista.prioridade}}{% endif %}">Alta</button>
+                    
+            <button type="submit" name="prioridade_lista" value="media" 
+                    class="{% if lista.prioridade == 'media' %}selected-{{lista.prioridade}}{% endif %}">Média</button>
+                    
+            <button type="submit" name="prioridade_lista" value="baixa" 
+                    class="{% if lista.prioridade == 'baixa' %}selected-{{lista.prioridade}}{% endif %}">Baixa</button>
+        </form>
+
+        <h2>Filtrar por Tags:</h2>
+        <form method="GET" action="{% url 'detalhe_lista' lista_id=lista.pk %}">
+            
+            {% for tag in tags %}
+                <label class="tag-filtro-item">
+                    <input type="checkbox" 
+                        name="filtro_tag" 
+                        value="{{ tag.pk }}"
+                        onchange="this.form.submit()"
+                        
+                        {% if tag.pk|stringformat:"s" in tags_filtradas_ids %}checked{% endif %}
+                    > 
+                    {{ tag.nome }}
+                </label>
+            {% empty %}
+                <p>Nenhuma tag para filtrar.</p>
+            {% endfor %}
+            
+            {% if tags_filtradas_ids %}
+                <a href="{% url 'detalhe_lista' lista_id=lista.pk %}" class="limpar-filtro">Limpar Filtros</a>
+            {% endif %}
+        </form>
+
+        <a href="{% url 'apagar_tarefas_concluidas' lista_id=lista.pk %}">Apagar todas as tarefas concluidas</a>
+        <a href="{% url 'apagar_lista' lista_id=lista.pk %}">Apagar lista</a>
+        <a href="{% url 'home' %}">Voltar para o início</a>
+    </div>
+    <div class="conteudo-lista"> <!-- tarefas e acoes -->
+        <div class="lista-header {{ lista.prioridade }}"> <div class="nome-lista-container">
+                <form method="POST">
+                    {% csrf_token %}
+                    <input 
+                        type="text" 
+                        name="nome_lista"
+                        value="{{ lista.nome }}" 
+                        onchange="this.form.submit()"
+                        class="nome-lista">
+                </form>
+                
+                <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.5">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+            </div>
+
+            <div class="progresso-container">
+                <div class="barra-progresso-base">
+                    <div class="barra-progresso-fill" style="width: {{ lista.calcular_progresso }}%;"></div>
+                </div>
+                <span class="porcentagem-texto">{{ lista.calcular_progresso|floatformat:0 }}%</span>
+            </div>
+        </div>
+        <hr style="border: 1px solid black; width: 80%; margin: 40px auto;">
+        <div class="conteudo-tarefas">
+            <table class="tabela-tarefas">
+                <thead>
+                    <tr>
+                        <th style="width: 40px;"></th> <th>Tarefas</th>
+                        <th>Prazo</th>
+                        <th>Tags</th>
+                        <th style="width: 40px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tarefa in tarefas %}
+                        <tr class="{% if tarefa.concluido %}concluida{% endif %}">
+                            <td> 
+                                <form method="POST" action="{% url 'toggle_tarefa' lista_id=lista.pk tarefa_id=tarefa.pk %}">
+                                    {% csrf_token %}
+                                    <input type="checkbox" 
+                                        name="concluido" 
+                                        onchange="this.form.submit()" 
+                                        {% if tarefa.concluido %}checked{% endif %}>
+                                </form>
+                            </td>
+                            <td> 
+                                <form method="POST" action="{% url 'editar_tarefa' lista_id=lista.pk tarefa_id=tarefa.pk %}"> 
+                                    {% csrf_token %}
+                                    <input 
+                                        type="text" 
+                                        name="nome_tarefa"
+                                        value="{{ tarefa.nome }}" 
+                                        onchange="this.form.submit()">
+                                </form>
+                            </td>
+                            <td> 
+                                <form method="POST" action="{% url 'editar_tarefa' lista_id=lista.pk tarefa_id=tarefa.pk %}"> 
+                                    {% csrf_token %}
+                                    <input 
+                                        type="date" 
+                                        name="prazo_tarefa"
+                                        value="{{ tarefa.prazo|date:'Y-m-d' }}" 
+                                        onchange="this.form.submit()">
+                                </form>
+                            </td>
+                            <td> 
+                                <div id="tags-visual-{{ tarefa.pk }}">
+                                    {% for tag in tarefa.tags.all %} 
+                                        <span class="tag-balao" data-tag-id="{{ tag.pk }}">{{ tag.nome }}</span>
+                                    {% endfor %}
+                                </div>
+                                
+                                <button onclick="toggleDropdown(event, {{ tarefa.pk }})">➕</button>
+                            </td>
+                            <td>
+                                <a href="{% url 'apagar_tarefa' lista_id=lista.pk tarefa_id=tarefa.pk %}">🗑️</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    
+                    <tr class="adicionar-tarefa">
+                        <form method="POST" action="{% url 'adicionar_tarefa' lista_id=lista.pk %}">
+                            {% csrf_token %}
+                            
+                            <td>
+                                <button type="submit" style="display: none;" id="adicionar-btn">Adicionar</button>
+                                <label for="adicionar-btn" class="adicionar-icone" onclick="document.getElementById('nova-tarefa-input').focus()">+</label>
+                            </td>
+                            <td>
+                                <input type="text" 
+                                    name="titulo_tarefa" 
+                                    placeholder="Adicionar nova tarefa..." 
+                                    id="nova-tarefa-input"
+                                    required>
+                            </td>
+                            <td>
+                                <input type="date" 
+                                    name="prazo">
+                            </td>
+                            <td></td>
+                            <td></td>
+                        </form>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="drop-down-tags" id="seletor-tags-modal" style="display: none; position: absolute; border: 1px black solid; background-color: white;">
+            <form method="POST" id="form-vincular-tags">
+                {% csrf_token %}
+                <input type="hidden" name="tarefa_id" id="input-tarefa-id">
+                
+                <p>Selecione as Tags:</p>
+                
+                <div class="tag-listagem-container">
+                    {% for tag in tags %} 
+                        <label class="tag-checkbox-item">
+                            <input type="checkbox" 
+                                name="marcar_tag"       id="tag-checkbox-{{ tag.pk }}"
+                                value="{{ tag.pk }}"    onchange="submitFormDelayed()"> {{ tag.nome }}
+                        </label>
+                    {% empty %}
+                        <p>Nenhuma tag disponível. <a href="{% url 'gerenciar_tags' %}">Crie uma agora</a>.</p>
+                    {% endfor %}
+                </div>
+                
+                <button type="submit" style="display: none;">Salvar</button>
+            </form>
+            
+            <button onclick="fecharDropdown()">Fechar</button>
         </div>
     </div>
 </div>
 
-<div class="aside">
-    <h2>Prioridade da lista:</h2>
-    <form method="POST"> <!-- muda a prioridade da lista -->
-        {% csrf_token %}
-        <button type="submit" name="prioridade_lista" value="alta" 
-                class="{% if lista.prioridade == 'alta' %}selected-{{lista.prioridade}}{% endif %}">Alta</button>
-                
-        <button type="submit" name="prioridade_lista" value="media" 
-                class="{% if lista.prioridade == 'media' %}selected-{{lista.prioridade}}{% endif %}">Média</button>
-                
-        <button type="submit" name="prioridade_lista" value="baixa" 
-                class="{% if lista.prioridade == 'baixa' %}selected-{{lista.prioridade}}{% endif %}">Baixa</button>
-    </form>
-
-    <h2>Filtrar por Tags:</h2>
-    <form method="GET" action="{% url 'detalhe_lista' lista_id=lista.pk %}">
-        
-        {% for tag in tags %}
-            <label class="tag-filtro-item">
-                <input type="checkbox" 
-                    name="filtro_tag" 
-                    value="{{ tag.pk }}"
-                    onchange="this.form.submit()"
-                    
-                    {% if tag.pk|stringformat:"s" in tags_filtradas_ids %}checked{% endif %}
-                > 
-                {{ tag.nome }}
-            </label>
-        {% empty %}
-            <p>Nenhuma tag para filtrar.</p>
-        {% endfor %}
-        
-        {% if tags_filtradas_ids %}
-            <a href="{% url 'detalhe_lista' lista_id=lista.pk %}" class="limpar-filtro">Limpar Filtros</a>
-        {% endif %}
-    </form>
-
-    <a href="{% url 'apagar_tarefas_concluidas' lista_id=lista.pk %}">Apagar todas as tarefas concluidas</a>
-    <a href="{% url 'apagar_lista' lista_id=lista.pk %}">Apagar lista</a>
-    <a href="{% url 'home' %}">Voltar para o início</a>
-</div>
-
-<!-- Tabela com as tarefas -->
-<table class="tabela-tarefas">
-    <tbody>
-        {% for tarefa in tarefas %}
-            <tr class="{% if tarefa.concluido %}concluida{% endif %}">
-                <td> 
-                    <form method="POST" action="{% url 'toggle_tarefa' lista_id=lista.pk tarefa_id=tarefa.pk %}">
-                        {% csrf_token %}
-                        <input type="checkbox" 
-                               name="concluido" 
-                               onchange="this.form.submit()" 
-                               {% if tarefa.concluido %}checked{% endif %}>
-                    </form>
-                </td>
-                <td> 
-                    <form method="POST" action="{% url 'editar_tarefa' lista_id=lista.pk tarefa_id=tarefa.pk %}"> 
-                        {% csrf_token %}
-                        <input 
-                            type="text" 
-                            name="nome_tarefa"
-                            value="{{ tarefa.nome }}" 
-                            onchange="this.form.submit()">
-                    </form>
-                </td>
-                <td> 
-                    <form method="POST" action="{% url 'editar_tarefa' lista_id=lista.pk tarefa_id=tarefa.pk %}"> 
-                        {% csrf_token %}
-                        <input 
-                            type="date" 
-                            name="prazo_tarefa"
-                            value="{{ tarefa.prazo|date:'Y-m-d' }}" 
-                            onchange="this.form.submit()">
-                    </form>
-                </td>
-                <td> 
-                    <div id="tags-visual-{{ tarefa.pk }}">
-                        {% for tag in tarefa.tags.all %} 
-                            <span class="tag-balao" data-tag-id="{{ tag.pk }}">{{ tag.nome }}</span>
-                        {% endfor %}
-                    </div>
-                    
-                    <button onclick="toggleDropdown(event, {{ tarefa.pk }})">➕</button>
-                </td>
-                 <td>
-                    <a href="{% url 'apagar_tarefa' lista_id=lista.pk tarefa_id=tarefa.pk %}">🗑️</a>
-                </td>
-            </tr>
-        {% endfor %}
-        
-        <tr class="adicionar-tarefa">
-            <form method="POST" action="{% url 'adicionar_tarefa' lista_id=lista.pk %}">
-                {% csrf_token %}
-                
-                <td></td>
-                <td>
-                    <input type="text" 
-                           name="titulo_tarefa" 
-                           placeholder="Adicionar nova tarefa..." 
-                           id="nova-tarefa-input"
-                           required>
-                </td>
-                <td>
-                    <input type="date" 
-                           name="prazo">
-                </td>
-                <td>
-                    <button type="submit" style="display: none;" id="adicionar-btn">Adicionar</button>
-                    <label for="adicionar-btn" class="adicionar-icone" onclick="document.getElementById('nova-tarefa-input').focus()">+</label>
-                </td>
-                <td></td>
-            </form>
-        </tr>
-    </tbody>
-</table>
-
-<div class="drop-down-tags" id="seletor-tags-modal" style="display: none; position: absolute; border: 1px black solid; background-color: white;">
-    
-    <form method="POST" id="form-vincular-tags">
-        {% csrf_token %}
-        <input type="hidden" name="tarefa_id" id="input-tarefa-id">
-        
-        <p>Selecione as Tags:</p>
-        
-        <div class="tag-listagem-container">
-            {% for tag in tags %} 
-                <label class="tag-checkbox-item">
-                    <input type="checkbox" 
-                           name="marcar_tag"       id="tag-checkbox-{{ tag.pk }}"
-                           value="{{ tag.pk }}"    onchange="submitFormDelayed()"> {{ tag.nome }}
-                </label>
-            {% empty %}
-                <p>Nenhuma tag disponível. <a href="{% url 'gerenciar_tags' %}">Crie uma agora</a>.</p>
-            {% endfor %}
-        </div>
-        
-        <button type="submit" style="display: none;">Salvar</button>
-    </form>
-    
-    <button onclick="fecharDropdown()">Fechar</button>
-</div>
 
 <script>
     const LISTA_ID = {{ lista.pk }};
@@ -237,6 +288,50 @@
         modal.style.left = `${rect.left + window.scrollX}px`;
         modal.style.display = 'block';
     }
+
+    // deviaq passar essa parte seguinte para um static global
+
+    let clickForaHandler = null;
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const btnToggle = document.querySelector('header button'); 
+    
+    if (sidebar.style.display === 'none' || sidebar.style.display === '') {
+        sidebar.style.display = 'block';
+        clickForaHandler = (e) => {
+            if (!sidebar.contains(e.target) && !btnToggle.contains(e.target)) {
+                fecharSidebar();
+            }
+        };
+        setTimeout(() => {
+            document.addEventListener('click', clickForaHandler);
+        }, 10);
+
+    } else {
+        fecharSidebar();
+    }
+}
+
+function fecharSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.style.display = 'none';
+    esconderContinue(); 
+    
+    if (clickForaHandler) {
+        document.removeEventListener('click', clickForaHandler);
+        clickForaHandler = null;
+    }
+}
+
+function mostrarContinue() {
+    document.getElementById('continue').style.display = 'block';
+}
+
+function esconderContinue() {
+    const cont = document.getElementById('continue');
+    if (cont) cont.style.display = 'none';
+}
 
 </script>
 

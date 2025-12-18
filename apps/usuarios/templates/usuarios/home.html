@@ -6,117 +6,153 @@
 
 <header>
     <h1 class="logo">Tisk Task</h1>
-    <button onclick="toggleSidebar()">☰</button>
+    <button onclick="toggleSidebar()" class="btn-menu">
+        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" cursor="pointer">
+            <path d="M4 6H20" stroke="black" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M4 12H20" stroke="black" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M4 18H20" stroke="black" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+    </button>
 </header>
 
-<div id="sidebar" style="display: none; border-left: 1px solid black; height: 100vh; width: 250px; background-color: white; position: fixed; right: 0; top: 0; z-index: 9999; padding: 20px;">
-    <div class="user">
-        <!-- Icone de user -->
-        <h2>{{ request.user.username }}</h2>
-    </div>
-    <div class="apagar-user">
-        <p onclick="mostrarContinue()">Apagar conta</p>
-        <div id="continue" style="display: none;">
-            <p>Tem certeza que deseja apagar sua conta?</p>
-            <button onclick="esconderContinue()">Não</button>
-            <a href="{% url 'apagar_conta' %}" style="color: red;">Sim</a>
+<div id="sidebar" class="sidebar">
+    <div class="user-section">
+        <div class="user-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
         </div>
+        <h2>{{ usuario.nome }}</h2>
     </div>
-    <a href="{% url 'logout' %}">Sair da conta</a>
+
+    <nav class="sidebar-nav">
+        <div class="nav-item apagar-user">
+            <p onclick="mostrarContinue()">Apagar conta</p>
+            <div id="continue" class="confirmacao-box" style="display: none;">
+                <p>Tem certeza?</p>
+                <div class="confirm-buttons">
+                    <button onclick="esconderContinue()" class="btn-negativo">Não</button>
+                    <a href="{% url 'apagar_conta' %}" class="btn-positivo">Sim</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-item">
+            <a href="{% url 'logout' %}">Sair da conta</a>
+        </div>
+    </nav>
 </div>
 
-<div class="aside">
-    <div class="filtros-prioridade">
-        <h2>Esconder listas:</h2>
-        <form method="GET" action="{% url 'home' %}">
-            <label>
-                <input type="checkbox" 
-                    name="esconder_prioridade" 
-                    value="baixa"
-                    onchange="this.form.submit()"
-                    {% if 'baixa' in prioridades_escondidas %}checked{% endif %}
-                > 
-                Prioridade Baixa
-            </label>
-        
-            <label>
-                <input type="checkbox" 
-                    name="esconder_prioridade" 
-                    value="media"
-                    onchange="this.form.submit()"
-                    {% if 'media' in prioridades_escondidas %}checked{% endif %}
-                > 
-                Prioridade Média
-            </label>
+<div class="conteudo-home">
+    <div class="aside">
+        <div class="filtros-prioridade">
+            <h2>Esconder listas:</h2>
+            <form method="GET" action="{% url 'home' %}">
+                <label>
+                    <input type="checkbox" 
+                        name="esconder_prioridade" 
+                        value="baixa"
+                        onchange="this.form.submit()"
+                        {% if 'baixa' in prioridades_escondidas %}checked{% endif %}
+                    > 
+                    Prioridade Baixa
+                </label>
             
-            <label>
-                <input type="checkbox" 
-                    name="esconder_prioridade" 
-                    value="alta"
-                    onchange="this.form.submit()"
-                    {% if 'alta' in prioridades_escondidas %}checked{% endif %}
-                > 
-                Prioridade Alta
-            </label>
-        </form>
-    </div>
-    <a href="{% url 'gerenciar_tags' %}">Gerenciar tags</a>
-</div>
-
-<div class="listas-container">
-    {% for lista in listas %}
-    <a href="{% url 'detalhe_lista' lista_id=lista.pk %}">
-        <div class="lista-card {{ lista.prioridade }}">
-            <h2>{{ lista.nome }}</h2>
-            <div class="barra-progresso" style="width: {{ lista.calcular_progresso }}%; height: 10px; background-color: lightblue"></div>
-        
-            {% for tarefa in lista.tarefa_set.all|slice:":3" %}
-                {% if not tarefa.concluido %}
-                <p id="tarefa_{{ tarefa.id }}">{{ tarefa.nome }}</p>
-                {% endif %}
-            {% empty %}
-                <p>Nenhuma tarefa nesta lista</p>
-            {% endfor %}
-
-            {% if lista.tarefa_set.count > 3 %}
-                <p>...</p>
-            {% endif %}
+                <label>
+                    <input type="checkbox" 
+                        name="esconder_prioridade" 
+                        value="media"
+                        onchange="this.form.submit()"
+                        {% if 'media' in prioridades_escondidas %}checked{% endif %}
+                    > 
+                    Prioridade Média
+                </label>
+                
+                <label>
+                    <input type="checkbox" 
+                        name="esconder_prioridade" 
+                        value="alta"
+                        onchange="this.form.submit()"
+                        {% if 'alta' in prioridades_escondidas %}checked{% endif %}
+                    > 
+                    Prioridade Alta
+                </label>
+            </form>
         </div>
-    </a>
-    {% empty %}
-    {% endfor %}
+        <a href="{% url 'gerenciar_tags' %}">Gerenciar tags</a>
+    </div>
 
-    <a href="{% url 'adicionar_lista' %}" class="card-adicionar">+</a>
+    <div class="listas-container">
+        {% for lista in listas %}
+        <a href="{% url 'detalhe_lista' lista_id=lista.pk %}" class="lista-card {{ lista.prioridade }}">
+            <div class="lista-card {{ lista.prioridade }}">
+                <h2>{{ lista.nome }}</h2>
+                <div class="barra-progresso-container">
+                    <div class="barra-progresso" style="width: {{ lista.calcular_progresso }}%"></div>
+                </div>
+            
+                <div class="card-corpo">
+                    {% for tarefa in lista.tarefa_set.all|slice:":2" %}
+                        <p>{{ tarefa.nome }}</p>
+                    {% empty %}
+                        <p>Vazia</p>
+                    {% endfor %}
+
+                    {% if lista.tarefa_set.count > 2 %}
+                        <p style="justify-content: center;">...</p>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+
+        <a href="{% url 'adicionar_lista' %}" class="card-adicionar">+</a>
+    </div>
 </div>
 
 <script>
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        // se estiver escondido, mostra como blcok, se não, esconde.
-        if (sidebar.style.display === 'none' || sidebar.style.display === '') {
-            sidebar.style.display = 'block';
-        } else {
-            sidebar.style.display = 'none';
-            esconderContinue(); // fecha a confirmação de apagar conta ao fechar o menu
-        }
-        // se clicar fora, esconde
-        document.addEventListener('click', (e) => {
-            if (sidebar.style.display === 'block') {
-                if (!sidebar.contains(e.target) && !btnToggle.contains(e.target)) {
-                    sidebar.style.display = 'none';
-                    esconderContinue();
-                }
+    let clickForaHandler = null;
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const btnToggle = document.querySelector('header button'); 
+    
+    if (sidebar.style.display === 'none' || sidebar.style.display === '') {
+        sidebar.style.display = 'block';
+        clickForaHandler = (e) => {
+            if (!sidebar.contains(e.target) && !btnToggle.contains(e.target)) {
+                fecharSidebar();
             }
-        });
-    }
+        };
+        setTimeout(() => {
+            document.addEventListener('click', clickForaHandler);
+        }, 10);
 
-    function mostrarContinue() {
-        document.getElementById('continue').style.display = 'block';
+    } else {
+        fecharSidebar();
     }
+}
 
-    function esconderContinue() {
-        document.getElementById('continue').style.display = 'none';
+function fecharSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.style.display = 'none';
+    esconderContinue(); 
+    
+    if (clickForaHandler) {
+        document.removeEventListener('click', clickForaHandler);
+        clickForaHandler = null;
     }
+}
+
+function mostrarContinue() {
+    document.getElementById('continue').style.display = 'block';
+}
+
+function esconderContinue() {
+    const cont = document.getElementById('continue');
+    if (cont) cont.style.display = 'none';
+}
 </script>
 
 {% endblock %}
